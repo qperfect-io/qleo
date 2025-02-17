@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "qleo"
+version = "0.1.0"
+description = ""
+authors = ["Guido Masella <guido.masella@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mimiqcircuits = "^0.15.3"
+mimiqlink = "^0.7.4"
+matplotlib = ">=3.8"
+quantanium = "^0.1.0"
+
+[tool.poetry.extras]
+visualization = ["matplotlib"]
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.2"
+pytest-accept = "^0.1"
+pytest-doctest-import = "^0.1"
+pytest-benchmark = "^4.0"
+scipy = "^1.13"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.3"
+pydata-sphinx-theme = "^0.15"
+jupyter-sphinx = "^0.5"
+sphinx-copybutton = "^0.5"
+sphinx-inline-tabs = "^2023.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

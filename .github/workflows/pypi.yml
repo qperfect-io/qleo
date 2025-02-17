@@ -1,0 +1,17 @@
+on:
+    push:
+      tags:
+        - 'v[0-9]+.[0-9]+.[0-9]+'
+  
+jobs:
+    build:
+        if: github.repository == 'qperfect-io/mimiqcircuits-python'
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v4  # clone current repo into runner
+
+        - name: Build and publish to pypi # Publish to pypi qleo
+          uses: JRubics/poetry-publish@v2.1
+          with:
+              python_version: "3.12"
+              pypi_token: ${{ secrets.PYPI_API_TOKEN }}
