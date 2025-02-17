@@ -10,7 +10,7 @@ Welcome to **QLEO**, a Python library designed for building, simulating, and ana
 Install the library directly from the Quobly GitHub repository:
 
 ```bash
-pip install "qleo @ git+ssh://git@github.com/qperfect-io/quoblyframework@devel"
+pip install qleo
 ```
 
 ### Optional Dependencies
@@ -18,7 +18,7 @@ pip install "qleo @ git+ssh://git@github.com/qperfect-io/quoblyframework@devel"
 To enable visualization feature, ensure you install:
 
 ```bash
-pip install "qleo[visualization] @ git+ssh://git@github.com/qperfect-io/quoblyframework@devel"
+pip install qleo[visualization]
 ```
 
 ---
