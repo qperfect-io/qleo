@@ -31,4 +31,4 @@ class Qleo(Quantanium):
         return res
 
 
-__all__ = ["Qleo"] + mc.__all__
+__all__ = ["qleo"] + mc.__all__
