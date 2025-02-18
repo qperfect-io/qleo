@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qleo"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Guido Masella <guido.masella@gmail.com>"]
 readme = "README.md"
