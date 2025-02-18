@@ -1,0 +1,20 @@
+# Requierement 1.3: image architecture AMD64 
+FROM python:3.12
+
+
+RUN pip install --upgrade pip
+COPY * qleo/.
+RUN pip install qleo
+
+# Requirements: user 42420 has the rights
+ARG USER=user_42
+RUN adduser --uid 42420 ${USER}
+
+# uncomment next line for sudo enabled user
+# RUN usermod -aG sudo ${USER}
+WORKDIR /home/${USER}
+
+#Requierement: single http port
+EXPOSE 8000
+
+USER ${USER}
