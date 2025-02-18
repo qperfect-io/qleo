@@ -19,7 +19,7 @@ import mimiqcircuits as mc
 from quantanium import Quantanium
 
 
-__version__ = "0.1.1"
+__version__ = "0.1.0"
 __name__ = "qleo"
 
 
@@ -31,4 +31,4 @@ class Qleo(Quantanium):
         return res
 
 
-__all__ = ["qleo"] + mc.__all__
+__all__ = ["Qleo"] + mc.__all__
