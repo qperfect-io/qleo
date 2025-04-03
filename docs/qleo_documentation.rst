@@ -32,6 +32,6 @@ Documentation Content
 
 | If you are using the **QLEO Framework** or **MIMIQ** for the first time it is highly recommended to head to the :doc:`installation <manual/installation>` and :doc:`quick start <quick_start>` pages to install MIMIQ and understand its basic functionnalities.  
 | The core of documentation can be found in the "Manual" where every feature offered by MIMIQ will be covered with explanations and examples.
-| If you encounter any issues you can contact us at `QPerfect <https://qperfect.io/#contact>`_.
+| If you encounter any issues you can contact QPerfect `here <https://qperfect.io/#contact>`_.
 | Finally for more in depth explanation of the different functions available you can head to the API section.
 
