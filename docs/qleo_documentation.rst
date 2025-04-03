@@ -1,5 +1,5 @@
 QLEO Framework
-====================
+===================================
 
 
 Welcome to the documentation of the QLEO Framework, a quantum emulation platform for the QLEO Quantum computer powered by QPerfect's MIMIQ.
@@ -12,8 +12,8 @@ Important Links
 -   :doc:`Quick start <quick_start>`
 
 
-What is the QLEO Framrwork?
---------------------
+What is QLEO?
+-------------------------------
 
 The QLEO Framework is a quantum computing emulator for the QLEO quantum computers, based on the `MIMIQ <https://qperfect.io/mimiq>`_ framework, developed by `QPerfect <https://qperfect.io>`_.
 
