@@ -45,7 +45,7 @@ The manual introduces the following types of operations:
 - :doc:`Special Operations </manual/special_ops>` such as more complex composite gates (e.g. QFT, oracles...) or custom gate declarations.
 
 Until here, all these tools allow the user to define a circuit.
-In order to simulate the circuit MIMIQ offers a State Vector (SV) simulator.
+In order to simulate the circuit QLEO offers a State Vector (SV) simulator.
 
 QLEO uses MIMIQ own `Protobuf` based format to export and import circuits defined through.
 However, it also allows to import and execute circuits from files written in `OpenQASM` format. This is all discussed in the :doc:`import-export </manual/import_export>`.

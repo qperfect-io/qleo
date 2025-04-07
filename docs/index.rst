@@ -12,11 +12,11 @@ for Quobly quantum hardware and based on QPerfect's MIMIQ.
 Quick Start
 -----------
 
-To install **QLEO** you can use the following command:
+To install **QLEO (by MIMIQ)** you can use the following command:
 
 .. code-block:: bash
 
-  pip install "qleo @ git+ssh://git@github.com/qperfect-io/quoblyframrwork.git"
+  pip install qleo
 
 
 For more details on installation, please refer to the :doc:`installation </manual/installation>` page. 

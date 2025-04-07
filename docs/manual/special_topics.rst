@@ -14,15 +14,15 @@ BitString
 ---------
 .. _bitstring:
 
-The :class:`~mimiqcircuits.BitString` class represents the state of bits and can be used 
+The :class:`~qleo.BitString` class represents the state of bits and can be used 
 to represent classical registers with specified values for each bit (0 or 1). At its core, 
-it is simply a vector of booleans. :class:`~mimiqcircuits.BitString`  allows direct bit manipulation, bitwise operations, and conversion to other data formats like integers. It’s designed for flexibility in binary manipulation tasks within quantum computations.
+it is simply a vector of booleans. :class:`~qleo.BitString`  allows direct bit manipulation, bitwise operations, and conversion to other data formats like integers. It’s designed for flexibility in binary manipulation tasks within quantum computations.
 
 Using BitString in MIMIQ Operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In MIMIQ, several operations use BitString as a direct input for conditional logic 
-or specific quantum operations, such as :class:`~mimiqcircuits.IfStatement` 
-and :class:`~mimiqcircuits.Amplitude`. See :doc:`non-unitary operations </manual/non_unitary_ops>` 
+or specific quantum operations, such as :class:`~qleo.IfStatement` 
+and :class:`~qleo.Amplitude`. See :doc:`non-unitary operations </manual/non_unitary_ops>` 
 and :doc:`statistical operations </manual/statistical_ops>` pages. Here are some examples:
 
 .. doctest:: BitString
@@ -42,7 +42,7 @@ and :doc:`statistical operations </manual/statistical_ops>` pages. Here are some
 
 Constructors
 ~~~~~~~~~~~~
-:class:`~mimiqcircuits.BitString` objects can be constructed in different ways.
+:class:`~qleo.BitString` objects can be constructed in different ways.
 
 - **From a String:** Use `BitString("binary_string")` to initialize a BitString by parsing a string in binary format.
 
@@ -87,7 +87,7 @@ making it easy to retrieve or set specific bit values.
     >>> bs
     bs"0111"
 
-A useful function is :func:`~mimiqcircuits.nonzeros`, which returns the indices of non-zero bits in a BitString.
+A useful function is :func:`~qleo.nonzeros`, which returns the indices of non-zero bits in a BitString.
 
 .. doctest:: BitString
 
@@ -97,11 +97,11 @@ A useful function is :func:`~mimiqcircuits.nonzeros`, which returns the indices 
 
 Conversion and Manipulation Methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The :class:`~mimiqcircuits.BitString` class includes functionality for 
+The :class:`~qleo.BitString` class includes functionality for 
 conversion to integer representations, indexing, and other methods for 
 retrieving and manipulating bit values:
 
-- **BitString to Integer:** Use :meth:`~mimiqcircuits.BitString.tointeger` to convert a `BitString` into its integer representation, 
+- **BitString to Integer:** Use :meth:`~qleo.BitString.tointeger` to convert a `BitString` into its integer representation, 
 
 By default it uses a big-endian order.
 
@@ -119,16 +119,16 @@ By default it uses a big-endian order.
       >>> bs.tointeger(endianess='little')
       42
 
-Alternatively, you can use the function :meth:`~mimiqcircuits.BitString.toindex`, which converts a `BitString` to an index for 
+Alternatively, you can use the function :meth:`~qleo.BitString.toindex`, which converts a `BitString` to an index for 
 purposes like vector indexing, checking bounds, and compatibility with 64-bit indexing constraints. It's 
-essentially the same as :meth:`~mimiqcircuits.BitString.tointeger`.
+essentially the same as :meth:`~qleo.BitString.tointeger`.
 
   .. doctest:: BitString
 
       >>> bs.toindex()
       21
 
-- **BitString to String:** Use :func:`~mimiqcircuits.to01`.
+- **BitString to String:** Use :func:`~qleo.to01`.
 
   .. doctest:: BitString
 
@@ -144,7 +144,7 @@ essentially the same as :meth:`~mimiqcircuits.BitString.tointeger`.
 
 Bitwise Operators
 ~~~~~~~~~~~~~~~~~
-:class:`~mimiqcircuits.BitString` supports bitwise operations such as NOT, AND, OR, XOR, 
+:class:`~qleo.BitString` supports bitwise operations such as NOT, AND, OR, XOR, 
 as well as bitwise shifts:
 
 - **NOT (~):**

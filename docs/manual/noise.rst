@@ -1,7 +1,7 @@
-Noisy simulations on MIMIQ
-==========================
+Noisy simulations on QLEO
+=========================
 
-This page provides detailed information on simulating noise in quantum circuits using MIMIQ.
+This page provides detailed information on simulating noise in quantum circuits using QLEO (by MIMIQ).
 
 Contents
 ========
@@ -16,42 +16,42 @@ Summary of noise functionality
 
 Custom noise channels:
 
-* :class:`~mimiqcircuits.Kraus`
-* :class:`~mimiqcircuits.MixedUnitary`
+* :class:`~qleo.Kraus`
+* :class:`~qleo.MixedUnitary`
 
 Specialized noise channels:
 
-* :class:`~mimiqcircuits.Depolarizing`
-* :class:`~mimiqcircuits.Depolarizing1`
-* :class:`~mimiqcircuits.Depolarizing2`
-* :class:`~mimiqcircuits.PauliNoise`
-* :class:`~mimiqcircuits.PauliX`
-* :class:`~mimiqcircuits.PauliY`
-* :class:`~mimiqcircuits.PauliZ`
-* :class:`~mimiqcircuits.AmplitudeDamping`
-* :class:`~mimiqcircuits.GeneralizedAmplitudeDamping`
-* :class:`~mimiqcircuits.PhaseAmplitudeDamping`
-* :class:`~mimiqcircuits.ThermalNoise`
-* :class:`~mimiqcircuits.ProjectiveNoise`
+* :class:`~qleo.Depolarizing`
+* :class:`~qleo.Depolarizing1`
+* :class:`~qleo.Depolarizing2`
+* :class:`~qleo.PauliNoise`
+* :class:`~qleo.PauliX`
+* :class:`~qleo.PauliY`
+* :class:`~qleo.PauliZ`
+* :class:`~qleo.AmplitudeDamping`
+* :class:`~qleo.GeneralizedAmplitudeDamping`
+* :class:`~qleo.PhaseAmplitudeDamping`
+* :class:`~qleo.ThermalNoise`
+* :class:`~qleo.ProjectiveNoise`
 
-Note that the :class:`~mimiqcircuits.Reset` type operations can also be thought of as noisy operations.
-Coherent noise can be added by using any of the supported gates (e.g., :class:`~mimiqcircuits.Gate`).
+Note that the :class:`~qleo.Reset` type operations can also be thought of as noisy operations.
+Coherent noise can be added by using any of the supported gates (e.g., :class:`~qleo.Gate`).
 
 Noise channels come with the following methods:
 
-* :func:`~mimiqcircuits.krauschannel.krausmatrices` and :func:`~mimiqcircuits.krauschannel.krausoperators`
-* :func:`~mimiqcircuits.krauschannel.unitarymatrices` and :func:`~mimiqcircuits.PauliNoise.unitarygates` (only for mixed-unitary)
-* :func:`~mimiqcircuits.krauschannel.probabilities` (only for mixed-unitary)
-* :func:`~mimiqcircuits.krauschannel.ismixedunitary`
+* :func:`~qleo.krauschannel.krausmatrices` and :func:`~qleo.krauschannel.krausoperators`
+* :func:`~qleo.krauschannel.unitarymatrices` and :func:`~qleo.PauliNoise.unitarygates` (only for mixed-unitary)
+* :func:`~qleo.krauschannel.probabilities` (only for mixed-unitary)
+* :func:`~qleo.krauschannel.ismixedunitary`
 
 To add noise channels to a circuit, you can use:
 
-* :func:`~mimiqcircuits.Circuit.push` (like gates)
-* :func:`~mimiqcircuits.Circuit.add_noise` (to add noise to every instance of a gate)
+* :func:`~qleo.Circuit.push` (like gates)
+* :func:`~qleo.Circuit.add_noise` (to add noise to every instance of a gate)
 
 To generate one sample of a circuit with mixed unitaries, use:
 
-* :func:`~mimiqcircuits.Circuit.sample_mixedunitaries`
+* :func:`~qleo.Circuit.sample_mixedunitaries`
 
 See below for further information. You can also run help(Circuit().sample_mixedunitaries).
 
@@ -179,7 +179,7 @@ You can create noise channels using one of the many functions available. Most no
 
 Check the documentation for each noise channel to understand the conditions that each parameter needs to fulfill for the noise channel to be valid.
 
-In MIMIQ, the most important distinction between noise channels is whether they are mixed-unitary or general Kraus channels. You can use :func:`~mimiqcircuits.krauschannel.ismixedunitary` to check if a channel is mixed unitary:
+In MIMIQ, the most important distinction between noise channels is whether they are mixed-unitary or general Kraus channels. You can use :func:`~qleo.krauschannel.ismixedunitary` to check if a channel is mixed unitary:
 
 .. doctest:: python
 
@@ -189,7 +189,7 @@ In MIMIQ, the most important distinction between noise channels is whether they 
     >>> AmplitudeDamping(0.1).ismixedunitary()
     False
 
-You can retrieve the Kraus matrices/operators used to define a given channel using :func:`~mimiqcircuits.krauschannel.krausmatrices` or :func:`~mimiqcircuits.krauschannel.krausoperators`. For example:
+You can retrieve the Kraus matrices/operators used to define a given channel using :func:`~qleo.krauschannel.krausmatrices` or :func:`~qleo.krauschannel.krausoperators`. For example:
 
 .. doctest:: python
 
@@ -200,7 +200,7 @@ You can retrieve the Kraus matrices/operators used to define a given channel usi
     [0, 1.0]
     ]
 
-For mixed unitary channels, you can obtain the list of probabilities and the list of unitary gates/matrices separately using :func:`~mimiqcircuits.krauschannel.probabilities`, :func:`~mimiqcircuits.krauschannel.unitarymatrices`, or :func:`~mimiqcircuits.krauschannel.unitarygates`, respectively:
+For mixed unitary channels, you can obtain the list of probabilities and the list of unitary gates/matrices separately using :func:`~qleo.krauschannel.probabilities`, :func:`~qleo.krauschannel.unitarymatrices`, or :func:`~qleo.krauschannel.unitarygates`, respectively:
 
 .. doctest:: python
 
@@ -224,7 +224,7 @@ How to add noise
 Adding noise one by one
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The simplest and most flexible way to add noise to a circuit is by using the :meth:`~mimiqcircuits.Circuit.push` method, similar to how gates are added. Here's an example of how to create a noisy 5-qubit GHZ circuit:
+The simplest and most flexible way to add noise to a circuit is by using the :meth:`~qleo.Circuit.push` method, similar to how gates are added. Here's an example of how to create a noisy 5-qubit GHZ circuit:
 
 .. doctest:: python
 
@@ -343,12 +343,12 @@ The simplest and most flexible way to add noise to a circuit is by using the :me
     ├── M @ q[4], c[4]
     └── M @ q[5], c[5]
 
-Note how bit-flip error (:class:`~mimiqcircuits.PauliX`) is added at the beginning for state preparation/reset errors and right before measuring for measurement errors.
+Note how bit-flip error (:class:`~qleo.PauliX`) is added at the beginning for state preparation/reset errors and right before measuring for measurement errors.
 
 Adding noise to all gates of the same type
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Usually, when adding noise to a circuit, the same type of noise is added to each instance of a given gate. Instead of adding noise channels one by one, you can use :meth:`~mimiqcircuits.Circuit.add_noise`. It takes several parameters:
+Usually, when adding noise to a circuit, the same type of noise is added to each instance of a given gate. Instead of adding noise channels one by one, you can use :meth:`~qleo.Circuit.add_noise`. It takes several parameters:
 
 .. doctest:: python
 
@@ -356,7 +356,7 @@ Usually, when adding noise to a circuit, the same type of noise is added to each
 
 This function adds the noise channel specified by `kraus` to every instance of the gate `g` in the circuit `circuit`. The optional parameter `before` determines whether to add the noise before or after the operation, and `parallel` determines whether to add the noise in parallel after/before a block of transversal gates.
 
-Here's the same noisy GHZ circuit, using :meth:`~mimiqcircuits.Circuit.add_noise`:
+Here's the same noisy GHZ circuit, using :meth:`~qleo.Circuit.add_noise`:
 
 .. doctest:: python
     >>> from qleo import *
@@ -488,14 +488,14 @@ Running a noisy circuit
 -----------------------
 .. _running-a-noisy-circuit:
 
-Circuits with noise can be run using the :func:`~mimiqcircuits.MimiqConnection.execute` function, 
+Circuits with noise can be run using the :func:`~qleo.execute` function, 
 just as with circuits without noise. Currently, noisy simulations are run using the quantum trajectories 
 method. In this case, when running a circuit with noise for `n` samples, the circuit will internally be 
 run once for each sample, with a different set of random Kraus operators selected based on the 
 corresponding probabilities.
 
 When the noise channel is a mixed-unitary channel, the unitary operators to be applied can be selected 
-before applying the operations on the state. Use the :func:`~mimiqcircuits.Circuit.sample_mixedunitaries` 
+before applying the operations on the state. Use the :func:`~qleo.Circuit.sample_mixedunitaries` 
 function to generate samples of a circuit with mixed-unitary noise:
 
 .. doctest:: python

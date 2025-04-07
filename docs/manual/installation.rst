@@ -1,10 +1,12 @@
 Installation
 ============
 
-In this section, we’ll walk you through the steps needed to get **MIMIQ Circuits** up and running on your 
-system. We’ll cover everything from creating a virtual environment, installing the necessary dependencies, 
-and installing the MIMIQ Circuits package, to setting up Jupyter for an enhanced coding experience. 
-By the end of this guide, you’ll be ready to dive into quantum computing with MIMIQ Circuits.
+In this section, we’ll walk you through the steps needed to get the Quobly
+Logical Emulator Online **QLEO (powered by MIMIQ)** up and running on your
+system. We’ll cover everything from creating a virtual environment, installing
+the necessary dependencies, and installing the QLEO package, to setting up
+Jupyter for an enhanced coding experience. By the end of this guide, you’ll be
+ready to dive into quantum computing with QLEO.
 
 
 Contents
@@ -63,17 +65,17 @@ Step 2: Activate the Virtual Environment
 
         .\c:\path\to\virtual\environment\Scripts\Activate.ps1
 
-Step 3: Install the Quobl Framework
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Step 3: Install the Quobly Framework
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use `pip` to install the latest version from GitHub:
 
 .. code-block:: shell
 
-    pip3 install "qleo @ git+ssh://git@github.com/qperfect-io/qleo.git"
+    pip3 install qleo
 
 Step 4: Verify the Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 List the installed packages to confirm that the package is installed correctly:
 
@@ -88,7 +90,7 @@ To use visualization functionality or work with Jupyter notebooks, install addit
 
 .. code-block:: shell
 
-    pip3 install "qleo[visualization] @ git+ssh://git@github.com/qperfect-io/mimiqcircuits-python.git"
+    pip3 install "qleo[visualization]"
 
 Jupyter Kernel Setup
 --------------------
