@@ -1,26 +1,40 @@
-[tool.poetry]
+[project]
 name = "qleo"
 version = "0.1.21"
-description = ""
-authors = ["Guido Masella <guido.masella@gmail.com>"]
+description = "Quobly Logical Emulator Online"
+authors = [{ name = "QPerfect", email = "guido.masella@qperfect.io" }]
 readme = "README.md"
+requires-python = ">=3.9,<4"
+dependencies = [
+    "numpy (>=1.26,<3.0)",
+    "mimiqlink (>=0.7,<0.8)",
+    "mimiqcircuits(>=0.15.3,<0.16)",
+    "bitarray (>=2.9,<3)",
+    "symengine (>=0.11,<1.0)",
+    "sympy (>=1.12,<2)",
+    "protobuf (>=5.26,<7)",
+    "scipy (>=1.13,<2)",
+    "quantanium (>=0.1,<0.2)",
+]
+license = "Apache-2.0"
+
+[project.optional-dependencies]
+visualization = ["matplotlib (>=3.8,<4)"]
+
+[tool.poetry]
+packages = [{ include = "mimiqcircuits", from = "src" }]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-mimiqcircuits = "^0.15.3"
-mimiqlink = "^0.7.4"
-matplotlib = ">=3.8"
-quantanium = "^0.1.0"
-
-[tool.poetry.extras]
-visualization = ["matplotlib"]
+scipy = [
+    { version = "1.13", markers = "python_version == '3.9'" },
+    { version = ">1.13,<=2", markers = "python_version > '3.9'" },
+]
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2"
 pytest-accept = "^0.1"
 pytest-doctest-import = "^0.1"
 pytest-benchmark = "^4.0"
-scipy = "^1.13"
 
 [tool.poetry.group.docs]
 optional = true
@@ -34,5 +48,5 @@ sphinx-inline-tabs = "^2023.4"
 recommonmark = "^0.7.1"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
