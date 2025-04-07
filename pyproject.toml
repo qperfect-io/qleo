@@ -22,7 +22,7 @@ license = "Apache-2.0"
 visualization = ["matplotlib (>=3.8,<4)"]
 
 [tool.poetry]
-packages = [{ include = "mimiqcircuits", from = "src" }]
+packages = [{ include = "qleo", from = "src" }]
 
 [tool.poetry.dependencies]
 scipy = [
