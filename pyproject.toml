@@ -1,20 +1,12 @@
 [project]
 name = "qleo"
-version = "0.1.23"
+version = "0.2.0"
 description = "Quobly Logical Emulator Online"
 authors = [{ name = "QPerfect", email = "guido.masella@qperfect.io" }]
 readme = "README.md"
 requires-python = ">=3.9,<4"
 dependencies = [
-    "numpy (>=1.26,<3.0)",
-    "mimiqlink (>=0.7,<0.8)",
-    "mimiqcircuits(>=0.15.3,<0.16)",
-    "bitarray (>=2.9,<3)",
-    "symengine (>=0.11,<1.0)",
-    "sympy (>=1.12,<2)",
-    "protobuf (>=5.26,<7)",
-    "scipy (>=1.13,<2)",
-    "quantanium (>=0.1,<0.2)",
+    "quantanium (>=1.0.12,<2.0.0)"
 ]
 license = "Apache-2.0"
 
