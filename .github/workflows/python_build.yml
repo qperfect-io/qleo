@@ -10,7 +10,7 @@ jobs:
             with:
               submodules: recursive
               fetch-depth: 0
-              token: ${{ secrets.QUANTANIUM_PAT }}
+              token: ${{ secrets.QLEOCUDAQPAT }}
 
           - name: Containerized Build
             uses: ./.github/actions/docker-build-action
