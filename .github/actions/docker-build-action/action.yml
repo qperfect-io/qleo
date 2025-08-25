@@ -1,0 +1,6 @@
+name: Docker Runner
+description: Sets up docker to build Qleo-cudaq
+
+runs:
+  using: 'docker'
+  image: '../../../libs/cudaqleo/Dockerfile'

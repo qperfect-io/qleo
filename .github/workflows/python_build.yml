@@ -1,0 +1,69 @@
+on:
+  push:
+
+jobs:
+    build_core:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+            with:
+              submodules: recursive
+              fetch-depth: 0
+              token: ${{ secrets.QUANTANIUM_PAT }}
+
+          - name: Containerized Build
+            uses: ./.github/actions/docker-build-action
+        
+        
+          - name: Setup wheels
+            run: |
+                mkdir artifacts
+                cp libnvqir-Qleo.so artifacts/.
+                cp Qleo.yml artifacts/.
+
+            
+          - name: Upload Build artefact
+            uses: actions/upload-artifact@v4
+            with:
+              name: core_artifacts
+              path: "${{ github.workspace }}/artifacts"
+
+    build_wheels:
+        needs: build_core
+        strategy:
+          matrix:
+            os: [ubuntu-latest, windows-latest] #, "macos-13", "macos-14"]
+        runs-on: ${{ matrix.os }}
+                
+        steps:
+          - uses: actions/checkout@v5
+          - uses: actions/download-artifact@v5
+            with:
+              name: core_artifacts
+              path: tmp
+          - name: Setup cudaq if linux
+            if: matrix.os == 'ubuntu-latest'
+            run: |
+                mkdir wheels
+                mkdir python/lib
+                mkdir python/targets
+                cp tmp/libnvqir-Qleo.so python/lib/.
+                cp tmp/Qleo.yml python/targets/.
+          
+          - name: Set up Python
+            uses: actions/setup-python@v5
+         
+          - name: Build Wheel
+            run: |
+                pip wheel . 
+            env:
+                CIBW_REPAIR_WHEEL_COMMAND: ""
+
+          - name: Upload Build artifacts
+            uses: actions/upload-artifact@v4
+            with:
+              name: python-wheels-${{matrix.os}}
+              path: *.whl
+
+
