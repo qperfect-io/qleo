@@ -33,11 +33,20 @@ jobs:
         needs: build_core
         strategy:
           matrix:
-            os: [ubuntu-latest, windows-latest] #, "macos-13", "macos-14"]
+            os: [ubuntu-latest, windows-latest, macos-13, macos-14]
         runs-on: ${{ matrix.os }}
                 
         steps:
           - uses: actions/checkout@v5
+
+
+          # - uses: robinraju/release-downloader@v1
+          #   with:
+          #     repository: 'git@github.com:qperfect-io/qleo-cudaq-integration.git'
+          #     latest: true
+          #     out-file-path: tmp
+          #     token: ${{ secrets.QLEOCUDAQPAT }}
+
           - uses: actions/download-artifact@v5
             with:
               name: core_artifacts
@@ -64,4 +73,4 @@ jobs:
             uses: actions/upload-artifact@v4
             with:
               name: python-wheels-${{matrix.os}}
-              path: "*.whl"
+              path: "qleo*.whl"
