@@ -46,10 +46,10 @@ jobs:
             if: matrix.os == 'ubuntu-latest'
             run: |
                 mkdir wheels
-                mkdir python/lib
-                mkdir python/targets
-                cp tmp/libnvqir-Qleo.so python/lib/.
-                cp tmp/Qleo.yml python/targets/.
+                mkdir src/lib
+                mkdir src/targets
+                cp tmp/libnvqir-Qleo.so src/lib/.
+                cp tmp/Qleo.yml src/targets/.
           
           - name: Set up Python
             uses: actions/setup-python@v5

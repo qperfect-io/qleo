@@ -10,9 +10,9 @@ if sys.platform == 'linux':
     # Code to run only on Linux
     print("Building for Linux...")
     data_files_to_install.append((f"lib/python{python_ver}/site-packages/targets",
-                                  ["libs/cudaqleo/python/targets/Qleo.yml"]))
+                                  ["src/targets/Qleo.yml"]))
     data_files_to_install.append((f"lib/python{python_ver}/site-packages/lib",
-                                  ["libs/cudaqleo/python/lib/libnvqir-Qleo.so"]))
+                                  ["src/lib/libnvqir-Qleo.so"]))
 
 setup(
     name="qleo",
