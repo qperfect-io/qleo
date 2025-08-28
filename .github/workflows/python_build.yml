@@ -146,4 +146,4 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: qleo_wheels
-            path: artifacts_dir/*
+            path: artifacts_dir/**/*.whl
