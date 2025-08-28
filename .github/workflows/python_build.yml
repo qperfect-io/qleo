@@ -1,4 +1,5 @@
 on:
+  workflow_dispatch:
   push:
 
 jobs:
@@ -69,8 +70,79 @@ jobs:
             env:
                 CIBW_REPAIR_WHEEL_COMMAND: ""
 
+          - name: Rename file for windows
+            if: ${{matrix.os}} == windows-latest
+            run: |
+              for file in *-any.whl; do
+                # Remove the '-any.ext' suffix
+                base_name="${file%-any.whl}"
+                
+                # Construct the new file name
+                new_file="${base_name}-win_amd64.whl"
+                
+                # Copy the file
+                mv "$file" "$new_file"
+              done
+
+          - name: Rename wheel for linux
+            if: ${{matrix.os}} == ubunutu-latest
+            run: |
+              for file in *-any.whl; do
+                # Remove the '-any.ext' suffix
+                base_name="${file%-any.whl}"
+                
+                # Construct the new file name
+                new_file="${base_name}-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+                
+                # Copy the file
+                mv "$file" "$new_file"
+              done
+
+          - name: Rename wheel for linux
+            if: ${{matrix.os}} == macos-14
+            run: |
+              for file in *-any.whl; do
+                # Remove the '-any.whl' suffix
+                base_name="${file%-any.whl}"
+                
+                # Construct the new file name
+                new_file="${base_name}-macosx_14_0_arm64.whl"
+                
+                # Copy the file
+                mv "$file" "$new_file"
+              done
+
+          - name: Rename wheel for linux
+            if: ${{matrix.os}} == macos-13
+            run: |
+              for file in *-any.whl; do
+                # Remove the '-any.whl' suffix
+                base_name="${file%-any.whl}"
+                
+                # Construct the new file name
+                new_file="${base_name}-macosx_13_0_arm64.whl"
+                
+                # Copy the file
+                mv "$file" "$new_file"
+              done
+
           - name: Upload Build artifacts
             uses: actions/upload-artifact@v4
             with:
               name: python-wheels-${{matrix.os}}
               path: "qleo*.whl"
+
+    combine_artifacts:
+      needs: build_wheels
+      runs-on: ubuntu-latest
+      steps:
+        - name: Download artifacts
+          uses: actions/download-artifact@v4
+          with:
+            path: artifacts_dir
+
+        - name: Upload artifacts
+          uses: actions/upload-artifact@v4
+          with:
+            name: qleo_wheels
+            path: artifacts_dir/*
