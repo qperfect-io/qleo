@@ -4,14 +4,18 @@ on:
         - 'v[0-9]+.[0-9]+.[0-9]+'
   
 jobs:
+
+
+
+    build-wheels:
+      uses: ./.github/workflows/python_build.yml
+      secrets: inherit
+
     build-and-publis:
         if: github.repository == 'qperfect-io/qleo'
         runs-on: ubuntu-latest
+        
         steps:
-
-        - name: Containerized Build
-          uses: ./.github/workflows/python_build.yml
-
         - uses: actions/download-artifact@v4 # clone current repo into runner
           with:
             name: qleo_wheels
