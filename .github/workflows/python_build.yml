@@ -1,0 +1,154 @@
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+    build_core:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+            with:
+              submodules: recursive
+              fetch-depth: 0
+              token: ${{ secrets.QLEOCUDAQPAT }}
+
+          - name: Containerized Build
+            uses: ./.github/actions/docker-build-action
+        
+        
+          - name: Setup wheels
+            run: |
+                mkdir artifacts
+                cp libnvqir-Qleo.so artifacts/.
+                cp Qleo.yml artifacts/.
+
+            
+          - name: Upload Build artefact
+            uses: actions/upload-artifact@v4
+            with:
+              name: core_artifacts
+              path: "${{ github.workspace }}/artifacts"
+
+    build_wheels:
+        needs: build_core
+        strategy:
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+        runs-on: ${{ matrix.os }}
+                
+        steps:
+          - uses: actions/checkout@v5
+
+
+          # - uses: robinraju/release-downloader@v1
+          #   with:
+          #     repository: 'git@github.com:qperfect-io/qleo-cudaq-integration.git'
+          #     latest: true
+          #     out-file-path: tmp
+          #     token: ${{ secrets.QLEOCUDAQPAT }}
+
+          - uses: actions/download-artifact@v5
+            with:
+              name: core_artifacts
+              path: tmp
+          - name: Setup cudaq if linux
+            if: ${{ matrix.os == 'ubuntu-latest' }}
+            run: |
+                mkdir wheels
+                mkdir src/lib
+                mkdir src/targets
+                cp tmp/libnvqir-Qleo.so src/lib/.
+                cp tmp/Qleo.yml src/targets/.
+          
+          - name: Set up Python
+            uses: actions/setup-python@v5
+         
+          - name: Build Wheel
+            run: |
+                pip wheel . 
+            env:
+                CIBW_REPAIR_WHEEL_COMMAND: ""
+
+          - name: Rename file for windows
+            if: ${{ matrix.os == 'windows-latest' }}
+            shell: bash # Use Git Bash
+            run: |
+              for file in *-any.whl; do
+                # Remove the '-any.ext' suffix
+                base_name="${file%-any.whl}"
+                
+                # Construct the new file name
+                new_file="${base_name}-win_amd64.whl"
+                
+                # Copy the file
+                mv "$file" "$new_file"
+              done
+
+          - name: Rename wheel for linux
+            if: ${{ matrix.os == 'ubuntu-latest' }}
+            run: |
+              for file in *-any.whl; do
+                # Remove the '-any.ext' suffix
+                base_name="${file%-any.whl}"
+                
+                # Construct the new file name
+                new_file="${base_name}-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+                
+                # Copy the file
+                mv "$file" "$new_file"
+              done
+
+          - name: Rename wheel for linux
+            if: ${{ matrix.os == 'macos-14' }}
+            run: |
+              for file in *-any.whl; do
+                # Remove the '-any.whl' suffix
+                base_name="${file%-any.whl}"
+                
+                # Construct the new file name
+                new_file="${base_name}-macosx_14_0_arm64.whl"
+                
+                # Copy the file
+                mv "$file" "$new_file"
+              done
+
+          - name: Rename wheel for linux
+            if: ${{ matrix.os  == 'macos-13' }}
+            run: |
+              for file in *-any.whl; do
+                # Remove the '-any.whl' suffix
+                base_name="${file%-any.whl}"
+                
+                # Construct the new file name
+                new_file="${base_name}-macosx_13_0_arm64.whl"
+                
+                # Copy the file
+                mv "$file" "$new_file"
+              done
+
+          - name: Upload Build artifacts
+            uses: actions/upload-artifact@v4
+            with:
+              name: python-wheels-${{matrix.os}}
+              path: "qleo*.whl"
+
+    combine_artifacts:
+      needs: build_wheels
+      runs-on: ubuntu-latest
+      steps:
+        - name: Download artifacts
+          uses: actions/download-artifact@v4
+          with:
+            path: artifacts_dir
+
+        - name: Prepare wheels
+          run: |
+            mkdir qleo_wheels
+            mv artifacts_dir/**/*.whl qleo_wheels/.
+
+        - name: Upload artifacts
+          uses: actions/upload-artifact@v4
+          with:
+            name: qleo_wheels
+            path: qleo_wheels/*.whl
