@@ -15,5 +15,6 @@
 # limitations under the License.
 #
 from mimiqcircuits.visualization import *
+from quantanium.visualization import *
 
 __name__ = "qleo.visualization"

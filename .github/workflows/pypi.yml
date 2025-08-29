@@ -4,14 +4,21 @@ on:
         - 'v[0-9]+.[0-9]+.[0-9]+'
   
 jobs:
-    build:
+    build-and-publis:
         if: github.repository == 'qperfect-io/qleo'
         runs-on: ubuntu-latest
         steps:
-        - uses: actions/checkout@v4  # clone current repo into runner
 
-        - name: Build and publish to pypi # Publish to pypi qleo
-          uses: JRubics/poetry-publish@v2.1
+        - name: Containerized Build
+          uses: ./.github/workflows/python_build.yml
+
+        - uses: actions/download-artifact@v4 # clone current repo into runner
           with:
-              python_version: "3.12"
-              pypi_token: ${{ secrets.PYPI_API_TOKEN }}
+            name: qleo_wheels
+            path: qleo_wheels
+
+        - name: Publish release distributions to PyPI
+          uses: pypa/gh-action-pypi-publish@release/v1
+          with:
+            packages-dir: qleo_wheels/.
+            password: ${{ secrets.PYPI_API_TOKEN }}
