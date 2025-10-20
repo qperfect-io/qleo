@@ -23,6 +23,8 @@ jobs:
                 mkdir artifacts
                 cp libnvqir-Qleo.so artifacts/.
                 cp Qleo.yml artifacts/.
+                cp libnvqir-QleoGpu.so artifacts/.
+                cp QleoGpu.yml artifacts/.
 
             
           - name: Upload Build artefact
