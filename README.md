@@ -109,6 +109,17 @@ The **Quobly Framework** is based on **MIMIQ** by **QPerfect**. Comprehensive do
 
 ---
 
+## GPU support
+
+Qleo supports GPU-accelerated simulation through NVIDIA’s cuStateVec library.
+This feature is currently available only on Linux systems equipped with an NVIDIA GPU.
+
+To run a simulation on the GPU, use the following command:
+```python
+sim = Qleo(use_gpu=True)
+sim.execute(circuit)
+``` 
+
 ## Contact
 
 For issues, suggestions, or inquiries, reach out via:
