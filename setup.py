@@ -14,9 +14,9 @@ if sys.platform == 'linux':
     data_files_to_install.append((f"lib/python{python_ver}/site-packages/lib",
                                   ["src/lib/libnvqir-Qleo.so"]))
     data_files_to_install.append((f"lib/python{python_ver}/site-packages/targets",
-                                  ["src/targets/QleoGpu.yml"]))
+                                  ["src/targets/QleoGPU.yml"]))
     data_files_to_install.append((f"lib/python{python_ver}/site-packages/lib",
-                                  ["src/lib/libnvqir-QleoGpu.so"]))
+                                  ["src/lib/libnvqir-QleoGPU.so"]))
 
 setup(
     name="qleo",
