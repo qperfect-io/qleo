@@ -128,6 +128,7 @@ celerybeat.pid
 .env
 .venv
 .qleo
+test_env
 env/
 venv/
 ENV/
