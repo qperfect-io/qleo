@@ -23,8 +23,9 @@ jobs:
                 mkdir artifacts
                 cp libnvqir-Qleo.so artifacts/.
                 cp Qleo.yml artifacts/.
-                cp libnvqir-QleoGPU.so artifacts/.
-                cp QleoGPU.yml artifacts/.
+                # A single shared library is being built for now
+                # cp libnvqir-QleoGPU.so artifacts/.
+                # cp QleoGPU.yml artifacts/.
 
             
           - name: Upload Build artefact
@@ -63,8 +64,9 @@ jobs:
                 mkdir src/targets
                 cp tmp/libnvqir-Qleo.so src/lib/.
                 cp tmp/Qleo.yml src/targets/.
-                cp tmp/libnvqir-QleoGPU.so src/lib/.
-                cp tmp/QleoGPU.yml src/targets/.
+                # A single shared library is being built for now
+                # cp tmp/libnvqir-QleoGPU.so src/lib/.
+                # cp tmp/QleoGPU.yml src/targets/.
           
           - name: Set up Python
             uses: actions/setup-python@v5

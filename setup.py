@@ -13,10 +13,11 @@ if sys.platform == 'linux':
                                   ["src/targets/Qleo.yml"]))
     data_files_to_install.append((f"lib/python{python_ver}/site-packages/lib",
                                   ["src/lib/libnvqir-Qleo.so"]))
-    data_files_to_install.append((f"lib/python{python_ver}/site-packages/targets",
-                                  ["src/targets/QleoGPU.yml"]))
-    data_files_to_install.append((f"lib/python{python_ver}/site-packages/lib",
-                                  ["src/lib/libnvqir-QleoGPU.so"]))
+    # A single shared library is being built for now
+    # data_files_to_install.append((f"lib/python{python_ver}/site-packages/targets",
+    #                               ["src/targets/QleoGPU.yml"]))
+    # data_files_to_install.append((f"lib/python{python_ver}/site-packages/lib",
+    #                               ["src/lib/libnvqir-QleoGPU.so"]))
 
 setup(
     name="qleo",
