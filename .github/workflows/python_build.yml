@@ -61,9 +61,7 @@ jobs:
             run: |
                 mkdir wheels
                 mkdir src/lib
-                mkdir src/targets
                 cp tmp/libnvqir-Qleo.so src/lib/.
-                cp tmp/Qleo.yml src/targets/.
                 # A single shared library is being built for now
                 # cp tmp/libnvqir-QleoGPU.so src/lib/.
                 # cp tmp/QleoGPU.yml src/targets/.
