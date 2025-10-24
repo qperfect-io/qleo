@@ -22,7 +22,7 @@ jobs:
             run: |
                 mkdir artifacts
                 cp libnvqir-Qleo.so artifacts/.
-                cp Qleo.yml artifacts/.
+                cp src/targets/Qleo.yml artifacts/.
                 # A single shared library is being built for now
                 # cp libnvqir-QleoGPU.so artifacts/.
                 # cp QleoGPU.yml artifacts/.
@@ -44,7 +44,7 @@ jobs:
         steps:
           - uses: actions/checkout@v5
 
-
+          # In the future it might be nice to use a release directly from the repo instead of rebuilding everython gfrom scratch
           # - uses: robinraju/release-downloader@v1
           #   with:
           #     repository: 'git@github.com:qperfect-io/qleo-cudaq-integration.git'
