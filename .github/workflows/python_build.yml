@@ -38,7 +38,7 @@ jobs:
         needs: build_core
         strategy:
           matrix:
-            os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+            os: [ubuntu-latest, windows-latest, macos-14]
         runs-on: ${{ matrix.os }}
                 
         steps:
@@ -68,6 +68,8 @@ jobs:
           
           - name: Set up Python
             uses: actions/setup-python@v5
+            with:
+              python-version: '3.13'
          
           - name: Build Wheel
             run: |
@@ -117,26 +119,6 @@ jobs:
                 # Copy the file
                 mv "$file" "$new_file"
               done
-
-          - name: Rename wheel for linux
-            if: ${{ matrix.os  == 'macos-13' }}
-            run: |
-              for file in *-any.whl; do
-                # Remove the '-any.whl' suffix
-                base_name="${file%-any.whl}"
-                
-                # Construct the new file name
-                new_file="${base_name}-macosx_13_0_arm64.whl"
-                
-                # Copy the file
-                mv "$file" "$new_file"
-              done
-
-          - name: Upload Build artifacts
-            uses: actions/upload-artifact@v4
-            with:
-              name: python-wheels-${{matrix.os}}
-              path: "qleo*.whl"
 
     combine_artifacts:
       needs: build_wheels
