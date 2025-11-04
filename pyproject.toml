@@ -6,7 +6,7 @@ authors = [{ name = "QPerfect", email = "guido.masella@qperfect.io" }]
 readme = "README.md"
 requires-python = ">=3.9,<4"
 dependencies = [
-    "quantanium (>=1.14.01,<2.0.0)"
+    "quantanium (>=1.14.1,<2.0.0)"
 ]
 license = "Apache-2.0"
 

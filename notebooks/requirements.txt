@@ -50,7 +50,7 @@ pytest==8.4.1
 python-dateutil==2.9.0.post0
 pytz==2025.2
 qleo==0.21.0
-quantanium==1.13.0
+quantanium==1.14.1
 requests==2.32.5
 scipy==1.16.1
 setuptools==80.9.0
