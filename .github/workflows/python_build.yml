@@ -57,7 +57,7 @@ jobs:
             with:
               name: core_artifacts
               path: tmp
-              
+
           - name: Setup cudaq if linux
             if: ${{ matrix.os == 'ubuntu-latest' }}
             run: |
@@ -121,6 +121,12 @@ jobs:
                 # Copy the file
                 mv "$file" "$new_file"
               done
+
+          - name: Upload Build artifacts
+            uses: actions/upload-artifact@v4
+            with:
+              name: python-wheels-${{matrix.os}}
+              path: "qleo*.whl"
 
     combine_artifacts:
       needs: build_wheels
