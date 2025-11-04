@@ -19,7 +19,7 @@ import mimiqcircuits as mc
 from quantanium import Quantanium
 
 
-__version__ = "0.21.0"
+__version__ = "0.22.02"
 __name__ = "qleo"
 
 

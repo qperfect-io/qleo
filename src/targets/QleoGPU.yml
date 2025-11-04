@@ -1,0 +1,5 @@
+name: QleoGPU
+description: "NVQIR QleoGPU backend"
+gpu-requirements: true
+config:
+	nvqir-simulation-backend: QleoGPU
