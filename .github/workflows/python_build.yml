@@ -53,6 +53,7 @@ jobs:
           #     token: ${{ secrets.QLEOCUDAQPAT }}
 
           - uses: actions/download-artifact@v5
+            if: ${{ matrix.os == 'ubuntu-latest' }}
             with:
               name: core_artifacts
               path: tmp
