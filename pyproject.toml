@@ -1,6 +1,6 @@
 [project]
 name = "qleo"
-version = "0.22.02"
+version = "0.22.03"
 description = "Quobly Logical Emulator Online"
 authors = [{ name = "QPerfect", email = "guido.masella@qperfect.io" }]
 readme = "README.md"
