@@ -1,0 +1,21 @@
+name: Bug report
+description: Report a problem with the Python API or installation
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction steps
+  - type: textarea
+    attributes:
+      label: Error output / traceback
+  - type: input
+    attributes:
+      label: OS
+  - type: input
+    attributes:
+      label: Python version
