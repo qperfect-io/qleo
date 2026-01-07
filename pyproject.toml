@@ -1,6 +1,6 @@
 [project]
 name = "qleo"
-version = "0.22.03"
+version = "0.22.04"
 description = "Quobly Logical Emulator Online"
 authors = [{ name = "QPerfect", email = "guido.masella@qperfect.io" }]
 readme = "README.md"
@@ -9,6 +9,12 @@ dependencies = [
     "quantanium (>=1.0.12,<2.0.0)"
 ]
 license = "Apache-2.0"
+
+[project.urls]
+Homepage = "https://github.com/qperfect-io/qleo"
+Documentation = "https://docs.qperfect.io/qleo"
+Repository = "https://github.com/qperfect-io/qleo"
+Issues = "https://github.com/qperfect-io/qleo/issues"
 
 [project.optional-dependencies]
 visualization = ["matplotlib (>=3.8,<4)"]

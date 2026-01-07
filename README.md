@@ -3,19 +3,10 @@
 
 Welcome to **QLEO**, a Python library designed for building, simulating, and analyzing quantum circuits powerd by **MIMIQ** emulator of **[QPerfect](https://qperfect.io/)**.
 
-This package uses a proprietary C++ backend that is not part of the public repository.
-
-<<<<<<< HEAD
-||||||| parent of 0830d1f (Devel (#8))
-If you encounter any errors or bugs while using QLEO, please report them by opening an issue in the QLEO repository [here](https://github.com/qperfect-io/qleo/issues).
-
----
-=======
-If you encounter any errors or bugs while using QLEO, please report them by opening an issue in the QLEO repository [here](https://github.com/qperfect-io/qleo/issues).
+If you encounter any errors or bugs while using QLEO, please report them by opening an issue in the QLEO repository [here](https://github.com/qperfect-io/qleo/issues).\
 Note: This package uses a proprietary C++ backend that is not part of the public repository.
 
 ---
->>>>>>> 0830d1f (Devel (#8))
 
 ## Installation
 
