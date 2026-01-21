@@ -5,7 +5,7 @@ on:
 
 jobs:
     build_core:
-        runs-on: LinuxGPU
+        runs-on: ubuntu-latest
         steps:
           - name: Checkout
             uses: actions/checkout@v4
@@ -14,14 +14,16 @@ jobs:
               fetch-depth: 0
               token: ${{ secrets.QLEOCUDAQPAT }}
 
-          - name: Containerized Build
-            uses: ./.github/actions/docker-build-action
-        
+          - name: Download GitLab release asset
+            run: |
+              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.05/downloads/libnvqir-Qleo.x86_64.so
+              ls
+
         
           - name: Setup wheels
             run: |
                 mkdir artifacts
-                cp libnvqir-Qleo.so artifacts/.
+                cp libnvqir-Qleo.x86_64.so artifacts/libnvqir-Qleo.so
                 cp src/targets/Qleo.yml artifacts/.
                 # A single shared library is being built for now
                 # cp libnvqir-QleoGPU.so artifacts/.
