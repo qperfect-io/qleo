@@ -1,4 +1,0 @@
-[submodule "libs/cudaqleo"]
-	path = libs/cudaqleo
-	url = git@github.com:qperfect-io/qleo-cudaq-integration.git
-	branch = feat-quantaniumsv
