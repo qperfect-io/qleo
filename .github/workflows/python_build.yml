@@ -16,18 +16,20 @@ jobs:
 
           - name: Download GitLab release asset
             run: |
-              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.05/downloads/libnvqir-Qleo.x86_64.so
-              ls
+              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.06/downloads/libnvqir-Qleo.so
+              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.06/downloads/libnvqir-QleoGPU.so
+              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.06/downloads/Qleo.yml
+              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.06/downloads/QleoGPU.yml
+              
 
         
           - name: Setup wheels
             run: |
                 mkdir artifacts
-                cp libnvqir-Qleo.x86_64.so artifacts/libnvqir-Qleo.so
-                cp src/targets/Qleo.yml artifacts/.
-                # A single shared library is being built for now
-                # cp libnvqir-QleoGPU.so artifacts/.
-                # cp QleoGPU.yml artifacts/.
+                cp libnvqir-Qleo.so artifacts/.
+                cp Qleo.yml artifacts/.
+                cp libnvqir-QleoGPU.so artifacts/.
+                cp QleoGPU.yml artifacts/.
 
             
           - name: Upload Build artefact
@@ -66,9 +68,9 @@ jobs:
                 mkdir wheels
                 mkdir src/lib
                 cp tmp/libnvqir-Qleo.so src/lib/.
-                # A single shared library is being built for now
-                # cp tmp/libnvqir-QleoGPU.so src/lib/.
-                # cp tmp/QleoGPU.yml src/targets/.
+                cp tmp/Qleo.yml src/targets/.
+                cp tmp/libnvqir-QleoGPU.so src/lib/.
+                cp tmp/QleoGPU.yml src/targets/.
           
           - name: Set up Python
             uses: actions/setup-python@v5
