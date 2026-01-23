@@ -20,7 +20,7 @@ if sys.platform == 'linux':
 
 setup(
     name="qleo",
-    version="0.22.05",
+    version="0.22.06",
     packages=["qleo"],
     package_dir={"qleo": "src/qleo"},
     include_package_data=True,
