@@ -41,7 +41,7 @@ packaging==25.0
 pandas==2.3.2
 pillow==11.3.0
 pluggy==1.6.0
-protobuf==6.32.0
+protobuf==6.33.5
 PubChemPy==1.0.4
 Pygments==2.19.2
 pyparsing==3.2.3
