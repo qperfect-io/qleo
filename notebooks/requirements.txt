@@ -39,7 +39,7 @@ openfermion==1.7.1
 openfermionpyscf==0.5
 packaging==25.0
 pandas==2.3.2
-pillow==11.3.0
+pillow==12.1.1
 pluggy==1.6.0
 protobuf==6.32.0
 PubChemPy==1.0.4
