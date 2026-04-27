@@ -16,10 +16,10 @@ jobs:
 
           - name: Download GitLab release asset
             run: |
-              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.06/downloads/libnvqir-Qleo.so
-              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.06/downloads/libnvqir-QleoGPU.so
-              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.06/downloads/Qleo.yml
-              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.06/downloads/QleoGPU.yml
+              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.1/downloads/libnvqir-Qleo.so
+              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.1/downloads/libnvqir-QleoGPU.so
+              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.1/downloads/Qleo.yml
+              curl -LO -H "PRIVATE-TOKEN: ${{ secrets.CUDAQ_INTEGRATION_RELEASE_TOKEN }}" https://gitlab.qperfect.io/api/v4/projects/19/releases/v0.1.1/downloads/QleoGPU.yml
               
 
         
