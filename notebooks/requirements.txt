@@ -17,7 +17,7 @@ cycler==0.12.1
 deprecation==2.1.0
 duet==0.2.9
 fastrlock==0.8.3
-fonttools==4.59.2
+fonttools==4.60.2
 h5py==3.14.0
 idna==3.10
 iniconfig==2.1.0
