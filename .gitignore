@@ -196,3 +196,15 @@ pyrightconfig.json
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
+
+# MkDocs site output (site_dir in mkdocs.yml)
+public/
+
+# Documentation staged into the wheel by scripts/build_wheel.py
+/src/qleo/_docs/
+
+# CUDA-Q backend staged into the platform wheel by scripts/build_wheel.py.
+# Only the tracked .gitkeep survives a build. (The repo-wide `*.so` rule
+# above already covers the libraries; qleo.yml needs this.)
+/src/qleo/_cudaq/*
+!/src/qleo/_cudaq/.gitkeep

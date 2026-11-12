@@ -1,0 +1,424 @@
+# Copyright (c) 2025-2026 QPerfect. All Rights Reserved.
+# Proprietary and confidential.
+#
+# Builds and publishes the `qleo` distribution: a pure-Python branding layer
+# over the `mimiq-exaqt` engine, plus the CUDA-Q backends (CPU and GPU)
+# bundled into the Linux wheel.
+#
+# Two wheels come out of this pipeline:
+#
+#   qleo-X.Y.Z-py3-none-any.whl                       no CUDA-Q backend
+#   qleo-X.Y.Z-py3-none-manylinux_2_NN_x86_64.whl     backends included
+#
+# NN is measured from the payload rather than declared; see `cudaq:fetch`.
+#
+# The backends (CPU: `libnvqir-qleo.so`, `libexaqt.so`, `qleo.yml`; GPU:
+# `libnvqir-qleo_gpu.so`, `libexaqt_gpu.so`, `qleo_gpu.yml`) are Linux
+# x86_64 only, so they cannot ride in a `py3-none-any` wheel that macOS and
+# Windows users would also download. pip prefers the more specific platform
+# tag on Linux x86_64 and falls back to `any` elsewhere, so every platform
+# gets a wheel that works. This replaces the old GitHub Actions flow, which
+# built one `any` wheel per OS and hand-renamed each to a platform tag.
+#
+# Nothing is built here: both backends are fetched from a cudaq-integration
+# *release*, because building them needs cmake, a Rust toolchain, CUDA-Q's
+# NVQIR headers and a nix runner — all of which that project's pipeline has.
+# Neither backend needs a CUDA toolkit or a GPU to build, but `qleo_gpu`
+# does need a real device to actually run — that is what `test:cudaq-gpu-
+# wheel` below proves, against the freshly built candidate wheel, before a
+# release is allowed to publish.
+
+default:
+  interruptible: true
+  image: python:3.12-bookworm
+
+variables:
+  # The cudaq-integration release whose backend this wheel carries. A *tag*,
+  # never a branch: the payload is shipped to users, so it has to be a frozen
+  # artefact rather than whatever `devel` last built. Bump it deliberately
+  # when a new backend is released.
+  CUDAQ_INTEGRATION_REF: "v0.3.0"
+  # URL-encoded project path rather than a numeric id: readable, reviewable,
+  # and it cannot silently point at the wrong project.
+  CUDAQ_INTEGRATION_PATH: "development%2Fqleo%2Fcudaq-integration"
+  # Generic-package name `glab release create --use-package-registry` writes
+  # every release asset under. Not our choice — it is glab's convention, and
+  # the same name every existing cudaq-integration release already uses.
+  CUDAQ_PACKAGE: "release-assets"
+  # Canonical file names; see src/qleo/cudaq.py, which reads them back out.
+  CUDAQ_PAYLOAD: "libnvqir-qleo.so libexaqt.so qleo.yml libnvqir-qleo_gpu.so libexaqt_gpu.so qleo_gpu.yml"
+  # CUDA-Q itself, for the GPU wheel test below — not PyPI.
+  NVIDIA_INDEX_URL: "https://pypi.nvidia.com"
+  CUDAQ_VERSION: "0.16.0.post1"
+  # The oldest base we intend to support: manylinux_2_28 is RHEL/Rocky/Alma 8
+  # and up. It is a *policy floor*, not the tag — `cudaq:fetch` measures what
+  # the payload really needs and writes the actual tag to
+  # `cudaq_payload/PLAT_TAG`, never claiming a floor below this one.
+  QLEO_PLAT_TAG_POLICY: "manylinux_2_28_x86_64"
+  # The engine is not on public PyPI; it lives in exaqt-python's GitLab PyPI
+  # registry. Needs qleo-private on *that* project's CI job token allowlist.
+  EXAQT_PROJECT_PATH: "development%2Fexaqt%2Fexaqt-python"
+  # Publishing a tagged wheel to this project's package registry is
+  # automatic. Publishing to *public PyPI* is not: set this to "true" as a
+  # project CI/CD variable, together with a `PYPI_API_TOKEN`, when a release
+  # is meant to go public. A PyPI name+version pair can never be reused, so
+  # this stays off until someone deliberately turns it on.
+  PUBLISH_PYPI: "false"
+
+stages:
+  - deps
+  - test
+  - docs
+  - build
+  - publish
+  - pages
+
+# Checks: everything that only validates the tree. Runs on merge requests, on
+# pushes to the integration branches, and again on a release tag.
+.rules-checks: &rules-checks
+  - if: $CI_PIPELINE_SOURCE == 'schedule'
+    when: never
+  - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/
+  - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "devel"
+  - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "devel"
+
+# Release work: fetching the backend, packing the wheels and publishing them.
+# Tag-only, so a merge request and a push to `devel` run the checks above and
+# nothing else.
+#
+# Nothing here re-tests the built artifact: the checks decide whether the tree
+# is fit to release, and by the time a tag is pushed that question is already
+# answered. What guards the packaging itself is `scripts/build_wheel.py`,
+# which refuses to finish unless the payload landed in the platform wheel and
+# nowhere else; and the backend inside that payload was tested against
+# CUDA-Q's own simulator by cudaq-integration's `test` job before it was ever
+# released.
+#
+# To rehearse packaging on a merge request, add `when: manual` on an MR
+# condition here.
+.rules-release: &rules-release
+  - if: $CI_PIPELINE_SOURCE == 'schedule'
+    when: never
+  - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/
+
+# The engine comes from exaqt-python's GitLab PyPI registry with this
+# pipeline's own job token — no stored credential. pip masks the password when
+# it echoes "Looking in indexes", so the token does not reach the log.
+.pip-engine-index: &pip-engine-index
+  - pip install -U pip
+  - export PIP_EXTRA_INDEX_URL="https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/api/v4/projects/${EXAQT_PROJECT_PATH}/packages/pypi/simple"
+
+# The CUDA-Q backend, taken from a cudaq-integration release rather than
+# rebuilt here.
+#
+# Auth is $CI_JOB_TOKEN, which needs qleo-private on cudaq-integration's CI
+# job token allowlist (Settings > CI/CD > Job token permissions). Without it
+# every request below 404s — GitLab hides existence rather than returning 403
+# — which is why the failure message names that setting.
+#
+# Three endpoints are tried in order: the generic package registry (a path
+# both projects compute from the same variables), the release downloads
+# endpoint (what the old GitHub flow used), and finally the release JSON,
+# following the asset link by name. The first is what cudaq-integration
+# publishes for this purpose; the others are fallbacks for tags cut before
+# that job existed.
+cudaq:fetch:
+  stage: deps
+  variables:
+    # The repository *is* needed: this job runs scripts/inspect_payload.py.
+    # It used to set `GIT_STRATEGY: none`, which was right while the
+    # validation was inline shell and became wrong the moment it moved into a
+    # script — the payload downloaded fine and then had nothing to check it.
+    PKG_URL: "${CI_API_V4_URL}/projects/${CUDAQ_INTEGRATION_PATH}/packages/generic/${CUDAQ_PACKAGE}/${CUDAQ_INTEGRATION_REF}"
+    REL_URL: "${CI_API_V4_URL}/projects/${CUDAQ_INTEGRATION_PATH}/releases/${CUDAQ_INTEGRATION_REF}"
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl binutils file
+  script:
+    - mkdir -p cudaq_payload
+    # `--fail` matters: without it curl writes the API's JSON error body into
+    # the file and the pipeline cheerfully ships a 200-byte "404 Not Found" as
+    # a shared library.
+    - |
+      set -e
+      for f in $CUDAQ_PAYLOAD; do
+        echo "--- $f"
+        if curl --fail --silent --show-error --location \
+             --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+             -o "cudaq_payload/$f" "$PKG_URL/$f"; then
+          echo "    from the generic package registry"
+        elif curl --fail --silent --show-error --location \
+             --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+             -o "cudaq_payload/$f" "$REL_URL/downloads/$f"; then
+          echo "    from the release downloads endpoint"
+        else
+          url=$(curl --fail --silent --header "JOB-TOKEN: $CI_JOB_TOKEN" "$REL_URL" \
+                | python3 -c "import json,sys;ls=json.load(sys.stdin)['assets']['links'];print(next(l['url'] for l in ls if l['name']=='$f'))") \
+            || {
+              echo "cannot find $f in $CUDAQ_INTEGRATION_REF of cudaq-integration." >&2
+              echo "Check that:" >&2
+              echo "  (a) the tag exists and its release job ran, and" >&2
+              echo "  (b) qleo-private is on cudaq-integration's CI job token allowlist." >&2
+              exit 1
+            }
+          curl --fail --location --header "JOB-TOKEN: $CI_JOB_TOKEN" -o "cudaq_payload/$f" "$url"
+          echo "    from the release asset link $url"
+        fi
+        test -s "cudaq_payload/$f"
+      done
+    - ls -l cudaq_payload/
+    # Validate the payload and derive the wheel's platform tag.
+    #
+    # Both live in scripts/inspect_payload.py rather than inline here, so the
+    # same code can be exercised without a pipeline — and so the logic that
+    # decides what a released wheel claims is reviewable and testable rather
+    # than buried in shell. Run it against any payload directory:
+    #
+    #   python scripts/inspect_payload.py DIR [--policy-tag ...]
+    #
+    # It refuses a payload that is not a real x86-64 ELF (a failed API
+    # download returns a JSON error body with a 200 status, which would
+    # otherwise ship as a shared library), refuses a qleo.yml for a different
+    # backend, reports the glibc/GLIBCXX floors per file, and writes the
+    # derived tag to cudaq_payload/PLAT_TAG for the wheel job.
+    - python3 scripts/inspect_payload.py cudaq_payload --policy-tag "$QLEO_PLAT_TAG_POLICY"
+  artifacts:
+    paths:
+      - cudaq_payload/
+    expire_in: 1 week
+  rules: *rules-release
+
+test:
+  stage: test
+  # `needs: []` so this starts immediately and does not inherit stage order.
+  # Without it a `cudaq:fetch` failure in the earlier stage skips the checks,
+  # and the pipeline reports nothing about whether the code is sound.
+  needs: []
+  image: python:${PYTHON_VERSION}-bookworm
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.10", "3.12", "3.13"]
+  before_script:
+    - *pip-engine-index
+    - pip install -e . pytest
+  script:
+    - python -c "import qleo; print('qleo', qleo.__version__)"
+    - pytest -q tests/
+  rules: *rules-checks
+
+# mkdocstrings imports `qleo` to autodoc it, so the package must be installed
+# before `mkdocs build` runs — which is also why the docs cannot be built
+# inside the wheel job: the wheel that carries them can only be packed once
+# the site exists.
+.docs-build:
+  before_script:
+    - *pip-engine-index
+    - pip install -e . mkdocs-material "mkdocstrings[python]" pymdown-extensions
+  script:
+    - mkdocs build          # site_dir: public (mkdocs.yml)
+
+# Builds the site once per pipeline and publishes it as the artifact the wheel
+# job bundles. Must NOT be manual — the wheel job `needs:` it, and GitLab
+# skips the dependents of an unplayed manual job.
+docs:site:
+  extends: .docs-build
+  stage: docs
+  needs: []   # same reason as `test`
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+  rules: *rules-checks
+
+# Both wheels from one job, so they cannot disagree about version or docs.
+wheel:
+  stage: build
+  rules: *rules-release
+  needs:
+    - job: docs:site
+      artifacts: true
+    - job: cudaq:fetch
+      artifacts: true
+    # Load-bearing: `needs:` overrides stage ordering, so without this the
+    # wheel would build — and `publish:registry` upload it — in parallel with
+    # the test job rather than after it. A failing test would then fail the
+    # pipeline only once the wheel was already in the registry. Listing it
+    # here gates the whole downstream chain (wheel -> publish), since `needs`
+    # dependencies are transitive. Waits for every entry of the 3.10/3.12/3.13
+    # matrix.
+    - job: test
+      artifacts: false
+  before_script:
+    # No engine index and no editable install needed here: packing the wheel
+    # never imports `qleo`, and the docs site arrives prebuilt as an artifact.
+    - pip install -U pip build
+  script:
+    # `public/` and `cudaq_payload/` arrive as artifacts; build_wheel.py
+    # reuses an existing site rather than rebuilding it, and asserts that the
+    # payload landed in the platform wheel and only there.
+    # The tag travels with the payload it describes, in the same artifact —
+    # `cudaq:fetch` measured it from these exact libraries.
+    - python scripts/build_wheel.py --cudaq-payload cudaq_payload --plat-name "$(cat cudaq_payload/PLAT_TAG)"
+  artifacts:
+    paths:
+      - dist/
+    when: always
+    expire_in: 1 week
+
+# Proves the actual released artifact works for an end user: install the
+# freshly built platform wheel with its `[gpu]` extra on a real GPU, and
+# run `cudaq.set_target("qleo_gpu")` against a small circuit. Nothing
+# earlier in this pipeline touches a GPU — `cudaq:fetch`/`inspect_payload.py`
+# only check the payload's ELF shape and ABI floor — so this is the one job
+# standing between "it builds" and "a manylinux user who runs `pip install
+# qleo[gpu] cudaq` gets a working qleo_gpu target," which is the whole
+# point of this feature.
+#
+# Same three-job split as cudaq-integration's `test:cudaq-gpu`/`:report`
+# (`cudaq-integration/.gitlab-ci.yml`, itself mirroring exaqt-python's
+# `.gpu-job`/`.gpu-tests`/`.gpu-report`): the custom SLURM executor (tags
+# `nix`, `slurm`, shared `octopus-gpu` resource group) relays only the
+# first seconds of a phase's live output, and a failing step tears the
+# allocation down before any artifact uploads, so the GPU job always
+# "succeeds" and records its real exit status beside the output; the
+# `:report` job, on an ordinary runner, prints that log and fails on the
+# status — it is the verdict `publish:registry` waits on.
+test:cudaq-gpu-wheel:
+  stage: build
+  tags:
+    - nix
+    - slurm
+  before_script: []
+  resource_group: octopus-gpu
+  interruptible: true
+  timeout: 30 minutes
+  variables:
+    CI_SLURM_GPUS: "1"
+    CI_SLURM_CPUS_PER_TASK: "4"
+    CI_SLURM_TIMELIMIT: "00-00:30:00"
+  cache: []
+  needs:
+    - job: wheel
+      artifacts: true
+  artifacts:
+    when: always
+    paths:
+      - cudaq-gpu-wheel-tests.log
+      - cudaq-gpu-wheel-tests.status
+    expire_in: 1 week
+  rules: *rules-release
+  script:
+    - |
+      set +e
+      {
+        scontrol show job "$SLURM_JOB_ID" | tr ' ' '\n' | grep -E '^(AllocTRES|TresPerJob|NumCPUs)='
+        if ! scontrol show job "$SLURM_JOB_ID" | grep -q 'gres/gpu'; then
+          echo "error: this job holds no GPU, so CI_SLURM_GPUS did not reach the executor."
+          false
+        else
+          # `qleo[gpu]` pulls the engine, which only exaqt-python's registry has.
+          export PIP_EXTRA_INDEX_URL="https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/api/v4/projects/${EXAQT_PROJECT_PATH}/packages/pypi/simple"
+          # nix has no global libstdc++, zlib or libcuda, which the CUDA-Q
+          # wheels expect from the system (same lookup as cudaq-integration's
+          # test:cudaq-gpu and exaqt-python's flake).
+          drv=/run/opengl-driver/lib
+          if [ ! -e "$drv/libcuda.so.1" ]; then
+            v=$(sed -n "s/.*NVIDIA UNIX.* \([0-9][0-9.]*\)  *Release.*/\1/p" /proc/driver/nvidia/version 2>/dev/null | head -1)
+            for c in /nix/store/*-nvidia-x11-"${v:-*}"-*/lib; do
+              case "$c" in *-lib32/lib) continue ;; esac
+              [ -e "$c/libcuda.so.1" ] && drv="$c"
+            done
+          fi
+          echo "libcuda from $drv"
+          rt=$(nix-build "<nixpkgs>" -A stdenv.cc.cc.lib --no-out-link)/lib:$(nix-build "<nixpkgs>" -A zlib --no-out-link)/lib
+          export LD_LIBRARY_PATH="$drv:$rt${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          nix-shell --packages python3 python3Packages.pip python3Packages.virtualenv --run '
+            set -e
+            # nix-shell puts its own pip on PYTHONPATH, which shadows the
+            # venv: the upgraded launcher then imports the old pip and fails.
+            unset PYTHONPATH
+            python3 -m venv .venv-cudaq-gpu-wheel || virtualenv .venv-cudaq-gpu-wheel
+            . .venv-cudaq-gpu-wheel/bin/activate
+            pip install --upgrade pip
+            pip install --extra-index-url "$NVIDIA_INDEX_URL" "cudaq==$CUDAQ_VERSION"
+            whl=$(ls dist/*manylinux*.whl)
+            echo "installing $whl[gpu]"
+            pip install "${whl}[gpu]"
+            qleo cudaq install
+            qleo cudaq status
+            python - <<PY
+      import cudaq
+      import qleo  # noqa: F401  (must be imported before set_target — see docs/cudaq.md)
+
+      cudaq.set_target("qleo_gpu")
+      assert "qleo_gpu" in {t.name for t in cudaq.get_targets()}, "qleo_gpu not available on this GPU host"
+
+      @cudaq.kernel
+      def ghz(n: int):
+          q = cudaq.qvector(n)
+          h(q[0])
+          for i in range(n - 1):
+              x.ctrl(q[i], q[i + 1])
+          mz(q)
+
+      counts = cudaq.sample(ghz, 10, shots_count=1000)
+      bitstrings = set(counts)
+      assert bitstrings == {"0" * 10, "1" * 10}, f"expected only the two GHZ branches, got {bitstrings}"
+      print("qleo_gpu wheel smoke test passed:", dict(counts.items()))
+      PY
+          '
+        fi
+      } > cudaq-gpu-wheel-tests.log 2>&1
+      echo $? > cudaq-gpu-wheel-tests.status
+      echo "cudaq-gpu-wheel-tests exited $(cat cudaq-gpu-wheel-tests.status); output in the :report job"
+
+test:cudaq-gpu-wheel:report:
+  stage: build
+  image: alpine:3
+  cache: []
+  needs:
+    - job: test:cudaq-gpu-wheel
+      artifacts: true
+  rules: *rules-release
+  script:
+    - cat cudaq-gpu-wheel-tests.log
+    - exit "$(cat cudaq-gpu-wheel-tests.status)"
+
+publish:registry:
+  stage: publish
+  needs:
+    - job: wheel
+      artifacts: true
+    # A release must not publish a `qleo_gpu` that the real-hardware smoke
+    # test just failed.
+    - job: test:cudaq-gpu-wheel:report
+      artifacts: false
+  before_script:
+    - pip install -U pip twine
+  script:
+    - ls -1 dist/
+    - |
+      set -e
+      test -n "$(ls dist/*py3-none-any.whl 2>/dev/null)" || { echo "no pure wheel" >&2; exit 1; }
+      test -n "$(ls dist/*manylinux*.whl 2>/dev/null)" || { echo "no platform wheel" >&2; exit 1; }
+      TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token twine upload \
+        --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi \
+        dist/*
+      if [ "$PUBLISH_PYPI" = "true" ]; then
+        if [ -z "$PYPI_API_TOKEN" ]; then
+          echo "PUBLISH_PYPI=true but PYPI_API_TOKEN is unset" >&2
+          exit 1
+        fi
+        TWINE_PASSWORD=${PYPI_API_TOKEN} TWINE_USERNAME=__token__ twine upload dist/*
+      else
+        echo "PUBLISH_PYPI is not \"true\" — published to the GitLab registry only"
+      fi
+  rules: *rules-release
+
+pages:
+  extends: .docs-build
+  stage: pages
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

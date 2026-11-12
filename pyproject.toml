@@ -1,29 +1,63 @@
 [project]
 name = "qleo"
-version = "0.22.1"
-description = "Quobly Logical Emulator Online"
-authors = [{ name = "QPerfect", email = "guido.masella@qperfect.io" }]
+version = "0.24.0"
+description = "Quobly Logical Emulator Online — SIMD-accelerated state-vector quantum simulator."
 readme = "README.md"
-requires-python = ">=3.9,<4"
-dependencies = [
-    "quantanium (>=1.15.24,<2.0.0)"
-]
-license = "Apache-2.0"
-
-[project.urls]
-Homepage = "https://github.com/qperfect-io/qleo"
-Documentation = "https://docs.qperfect.io/qleo"
-Repository = "https://github.com/qperfect-io/qleo"
-Issues = "https://github.com/qperfect-io/qleo/issues"
+requires-python = ">=3.10"
+authors = [{ name = "QPerfect", email = "guido.masella@qperfect.io" }]
+# The simulation engine. Qleo is a pure-Python branding layer over it, and
+# re-exports exactly what the released engine exposes; the version is pinned
+# tight because the exported names are the engine's own.
+dependencies = ["mimiq-exaqt>=0.5.1,<0.6"]
 
 [project.optional-dependencies]
-visualization = ["matplotlib (>=3.8,<4)"]
-cudaq = ["cudaq (<1)"]
+# Plots: `qleo.visualization` (`plotstate`, `StateWindow`) and
+# `mimiqcircuits.visualization` (`plothistogram` and friends). Taken through
+# the engine's own extra, so the matplotlib bound comes from one place. Kept
+# optional so headless installs stay light: `pip install qleo[visualization]`.
+visualization = ["mimiq-exaqt[visualization]"]
+# Qiskit bridge. `mimiq-qiskit` wraps any MIMIQ backend — QleoQCS included —
+# as a Qiskit `BackendV2`. Kept optional because it pulls in the whole Qiskit
+# stack, which callers of the native API have no use for. See docs/qiskit.md.
+qiskit = ["mimiq-qiskit>=0.4.2,<0.5"]
+# CUDA libraries for `QleoQCSGpu`, through the engine's own extra: the Linux
+# wheel carries the GPU backend but loads CUDA at runtime, so only the NVIDIA
+# driver has to come from the system.
+gpu = ["mimiq-exaqt[gpu]"]
+
+[project.scripts]
+# `qleo docs` opens the documentation bundled in the wheel (see
+# scripts/build_wheel.py, which stages the built mkdocs site under
+# `qleo/_docs/`).
+qleo = "qleo.cli:main"
+
+[project.urls]
+Documentation = "https://docs.qperfect.io/qleo/"
 
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-# All the following settings are optional:
-where = ["src"]  # ["."] by default
+where = ["src"]
+
+# Both staged by scripts/build_wheel.py: the documentation site, so
+# `docs_dir()` and `qleo docs` find it next to the installed package, and the
+# CUDA-Q backend, so `qleo cudaq install` has something to copy.
+#
+# `_cudaq/` is present only in the Linux x86_64 wheel; the pure `py3-none-any`
+# wheel ships without it and `qleo cudaq install` reports that. It is a data
+# directory inside the package, not a subpackage — deliberately no
+# `__init__.py`, so `packages.find` leaves it alone and package-data ships it.
+[tool.setuptools.package-data]
+qleo = ["py.typed", "_docs/**/*", "_cudaq/*.so", "_cudaq/*.yml"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    # Documentation toolchain: builds the site that scripts/build_wheel.py
+    # bundles into the wheel.
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.25",
+    "pymdown-extensions>=10.7",
+]

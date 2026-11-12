@@ -1,131 +1,148 @@
+# QLEO (Quobly Logical Emulator Online)
 
-# QLEO (Quobly Logical Emulator Online): Python Interface for Quantum Circuits
+**QLEO** is a Python library for building, simulating and analysing quantum
+circuits on [Quobly](https://quobly.io/) hardware models. It is the
+Quobly-branded distribution of **Exaqt** by
+**[QPerfect](https://qperfect.io/)** — a SIMD-accelerated state-vector
+simulator with a Rust core.
 
-Welcome to **QLEO**, a Python library designed for building, simulating, and analyzing quantum circuits powerd by **MIMIQ** emulator of **[QPerfect](https://qperfect.io/)**.
+Same engine, same API, Qleo names: `QleoQCS` *is* `exaqt.ExaqtQCS`, so
+anything written against one runs unchanged on the other. This repository
+holds only the branding layer; the engine is the `mimiq-exaqt` dependency.
 
-If you encounter any errors or bugs while using QLEO, please report them by opening an issue in the QLEO repository [here](https://github.com/qperfect-io/qleo/issues).\
-Note: This package uses a proprietary C++ backend that is not part of the public repository.
+> **Migrating from qleo 0.22.x?** The simulator class is now `QleoQCS`
+> (was `Qleo`), and `Qleo(use_gpu=True)` becomes `QleoQCSGpu()`.
+> `from qleo import *` still gives you the circuit API. See
+> [CHANGELOG.md](CHANGELOG.md).
 
----
+## Install (release wheel)
 
-## Installation
-
-Install the library directly from the Quobly GitHub repository:
-
-```bash
+```sh
 pip install qleo
+pip install qleo[visualization]   # + matplotlib, for plothistogram & co.
 ```
 
-### Optional Dependencies
+The wheel bundles the documentation. Read it offline, without a network round
+trip, with:
 
-To enable visualization feature, ensure you install:
-
-```bash
-pip install qleo[visualization]
+```sh
+qleo docs                  # open the bundled site in a browser
+qleo docs --print-path     # or just print where it lives
 ```
 
----
+## Install (development checkout)
 
-## Getting Started
+```sh
+cd qleo
+uv venv && uv sync
+uv pip install -e .
+.venv/bin/python -m pytest -q tests/
+```
 
-Start by importing the `qleo` library. This library provides tools for creating, manipulating, and simulating quantum circuits.
+An editable install carries no bundled docs, so `qleo docs` has nothing to
+open — run `mkdocs serve` instead. To produce the wheel exactly as CI
+publishes it, documentation included, run `python scripts/build_wheel.py`.
 
-1. **Import the Library**
+## GPU
 
-    By using `from qleo import *`, you gain access to all classes and methods required for quantum circuit operations.
+The Linux wheel carries an NVIDIA GPU backend, `QleoQCSGpu`, on
+cuStateVec. It needs the NVIDIA driver and the CUDA libraries, which the
+`gpu` extra installs:
 
-    ```python
+```sh
+pip install "qleo[gpu]"
+```
 
-    from qleo import *
-    ```
+```python
+from qleo import *
 
-2. **Create and Manipulate Circuits**
-   In this step, you create a quantum circuit with `Circuit()` and add gates to it.
-    `Hadamard Gate (GateH)`: Places each qubit in a superposition state.
-    `Controlled-Z Gate (GateCZ)`: Introduces entanglement between qubits by applying a phase shift if both qubits are in the |1⟩ state.
+sim = QleoQCSGpu() if gpu_available() else QleoQCS()
+```
 
-    ```python
-    n = 10
-    c = Circuit()
-    c.push(GateH(), range(n))
-    c.push(GateCZ(), range(n-1), range(1,n))
-    c.push(GateCZ(), 0, n-1)
-    ```
+`QleoQCSGpu(seed=n)` follows the same trajectory as `QleoQCS(seed=n)`, so a
+GPU run can be reproduced on a CPU.
 
-3. **Execute** & **Get Result**
-   Here, you execute the circuit on **QuoblySimulator** (`Simulates the quantum circuit using a state vector approach`) and retrieve the result.
+## Quick example
 
-    ```python
-    processor = Qleo()
-    result = processor.execute(c, nsamples=1000)
+```python
+import numpy as np
+from qleo import QleoSV, Rng
 
-    print(result)
-    ```
+sv = QleoSV.zero(3)
+sv.apply_h(0)
+sv.apply_cx(0, 1)
+sv.apply_cx(0, 2)
+print(sv.amplitudes())          # numpy complex128 array, length 2**3
 
-    The result contains detailed information about the circuit execution:
+# Multi-qubit Pauli expectation (no need to build a 2^k × 2^k matrix).
+print(sv.expectation_pauli("XXX", [0, 1, 2]))   # +1 for the GHZ state
 
-    ```
-    QCSResults:
-    ├── simulator: Quantanium StateVector 1.0
-    ├── timings:
-    │    ├── apply time: 0.000318101s
-    │    └── sample time: 0.000277592s
-    ├── fidelity estimate: 1
-    ├── average multi-qubit gate error estimate: 0
-    ├── most sampled:
-    │    ├── bs"0100001000" => 5
-    │    ├── bs"0000000000" => 5
-    │    ├── bs"1001010001" => 5
-    │    ├── bs"0111011110" => 5
-    │    └── bs"0010001010" => 4
-    ├── 1 executions
-    ├── 0 amplitudes
-    └── 1000 samples
-    ```
+# Sampling.
+r = Rng(seed=42)
+shots = sv.sample(r, nsamples=1000)             # shape (1000, 3) uint8
+```
 
-    The output provides a summary of your simulation results, including key information about the backend used, execution details, and measurement outcomes. You'll find details such as the simulator type, timings for circuit execution and measurement, fidelity estimates, and the most frequently observed quantum states. Additionally, it includes the total number of samples and any specific execution metrics for analyzing the performance and accuracy of your quantum circuit.
+## mimiqcircuits integration
 
-4. **Get Histogram of the samples**
-   The `result.histogram()` method generates a counts distribution of the sampled measurement outcomes.
+`qleo` re-exports the `mimiqcircuits` circuit API, so one import is enough:
 
-    ```python
-    result.histogram()
-    ```
+```python
+from qleo import *
 
-5. **Visualizing the results**
-   To visualize the results of your quantum circuits, you can use the `plothistogram` function provided by the `qleo.visualization` module.
+c = Circuit()
+c.push(GateH(), 0)
+c.push(GateCX(), 0, 1)
 
-   **Example**
+sim = QleoQCS()
+result = sim.execute(c, nsamples=1000)   # returns a mimiqcircuits.QCSResults
+print(result)
+```
 
-    ```python
-    from qleo.visualization import plothistogram
-    plothistogram(result)
-    ```
+Explicit imports work just as well, and are what the documentation uses:
 
-    ![image](image.png)
+```python
+import mimiqcircuits as mc
+from qleo import QleoQCS
 
----
+result = QleoQCS().execute(mc.Circuit(), nsamples=1000)
+```
+
+## Conventions
+
+- **Qubit ordering.** Qubit 0 is the **least-significant bit** of the
+  basis-state index (matches Qiskit and MimiqCircuitsBase).
+- **2-qubit gate basis.** For `apply_gate_2q(M, q1, q2)`, `q1` is the
+  **most significant** bit of the gate's local 2×2-bit basis. See the
+  Rust crate's docs for the precise layout.
+- **Cross-language reproducibility.** The same `Rng(seed)` produces the
+  same Xoshiro256++ stream in the Rust core, the Python wrapper, and
+  the Julia wrapper.
+
+## Errors
+
+The wrapper raises Python exception subclasses of `QleoError`:
+
+- `GateShapeError` — gate matrix has the wrong shape or layout.
+- `QubitIndexError` — qubit index out of bounds, or duplicate qubits.
+- `DegenerateStateError` — sampling a state with zero / non-finite norm.
+- `NonUnitaryError` — only raised when the Rust crate is built with the
+  `unitary-checks` feature; flags a non-unitary user matrix.
+
+`MemoryError` is raised for state-vector allocations that won't fit
+(e.g. `QleoSV.zero(40)`) — instead of aborting the process.
 
 ## Documentation
 
-The **Quobly Framework** is based on **MIMIQ** by **QPerfect**. Comprehensive documentation, tutorials, and examples on how to build circuits with the **Quobly Framework** and **MIMIQ** are available at [docs.qperfect.io](https://docs.qperfect.io/). Please remember to substitute any occurrences of `mimiqcircuits` in the documentation with `quoblyframwork`. For example, in place of `from mimiqcircuits import *`, use `from qleo import *`.
+Full documentation: [docs.qperfect.io/qleo](https://docs.qperfect.io/qleo/).
+The `mimiqcircuits` circuit API it builds on is documented at
+[docs.qperfect.io/mimiqcircuits-python](https://docs.qperfect.io/mimiqcircuits-python/).
 
----
+## Contributing
 
-## GPU support
-
-Qleo supports GPU-accelerated simulation through NVIDIA’s cuStateVec library.
-This feature is currently available only on Linux systems equipped with an NVIDIA GPU.
-
-To run a simulation on the GPU, use the following command:
-```python
-sim = Qleo(use_gpu=True)
-sim.execute(circuit)
-``` 
+See [CONTRIBUTING.md](CONTRIBUTING.md). Maintainers cutting a release should
+read [RELEASING.md](RELEASING.md).
 
 ## Contact
 
-For issues, suggestions, or inquiries, reach out via:
-
-- **Suggestions**: [contact (Quobly)](https://quobly.io/) or [contact (QPerfect)](https://qperfect/#contact) 
+- **Suggestions**: [contact (Quobly)](https://quobly.io/) or [contact (QPerfect)](https://qperfect.io/#contact)
 - **Email**: [support (QPerfect)](mailto:mimiq.support@qperfect.io)

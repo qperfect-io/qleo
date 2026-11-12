@@ -1,0 +1,91 @@
+# Copyright (c) 2025-2026 QPerfect. All Rights Reserved.
+# Proprietary and confidential.
+
+site_name: Qleo
+site_description: SIMD-accelerated state-vector quantum circuit simulator for MIMIQ
+# The public site. The same build is also served from GitLab Pages and opened
+# offline from inside the wheel, so canonical links and the sitemap point here,
+# at the copy meant to be indexed.
+site_url: https://docs.qperfect.io/qleo/
+site_dir: public
+copyright: Copyright &copy; 2025&ndash;2026 QPerfect. All rights reserved.
+
+# Brand theme from the shared QPerfect overlay (doc-themes/mkdocs), so this
+# site matches the other cards on docs.qperfect.io. Material only accepts
+# preset palette names, so the teal/amber palette is applied by overriding its
+# CSS variables in extra_css rather than here.
+#
+# The overlay's `navigation.instant` is deliberately NOT adopted: it fetches
+# pages over XHR, which CORS blocks under `file://` — and this site also ships
+# inside the wheel, where it is opened exactly that way by `qleo docs`.
+theme:
+  name: material
+  font:
+    text: Inter
+    code: JetBrains Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.tracking
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+    - toc.follow
+
+extra_css:
+  - stylesheets/qperfect.css
+
+hooks:
+  - hooks.py
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            # The documented types are aliases of the engine's own classes;
+            # griffe must load that package to follow them.
+            preload_modules: [exaqt]
+            show_source: false
+            show_root_heading: true
+            heading_level: 3
+            members_order: source
+            docstring_style: google
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.arithmatex:
+      generic: true
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Circuit Execution: execute.md
+  - Qiskit Interoperability: qiskit.md
+  - CUDA-Q Interoperability: cudaq.md
+  - Visualization: visualization.md
+  - API Reference: api.md
