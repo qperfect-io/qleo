@@ -151,13 +151,12 @@ map instead of a shell command.
 
 ## Public PyPI
 
-Deliberately off. `PUBLISH_PYPI` defaults to `"false"` and the tag pipeline
-publishes to the GitLab registry only. To publish publicly, set
-`PUBLISH_PYPI="true"` **and** a `PYPI_API_TOKEN` CI/CD variable; the job
-fails loudly rather than skipping if the flag is on without the token.
+Every `vX.Y.Z` tag publishes to PyPI as well as the GitLab registry, with
+the `QLEO_PYPI_TOKEN` group variable of `development/qleo`. It is protected,
+so only protected tags (`v*`) can read it; the job fails if it is missing.
 
-A PyPI name-and-version pair can never be reused, so treat this as a
-one-way door and check the wheels from a registry release first.
+A PyPI name-and-version pair can never be reused, so a tag is a one-way
+door: check the `devel` pipeline before tagging.
 
 ## Building the wheels locally
 

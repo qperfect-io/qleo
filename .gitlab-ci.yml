@@ -55,15 +55,9 @@ variables:
   # the payload really needs and writes the actual tag to
   # `cudaq_payload/PLAT_TAG`, never claiming a floor below this one.
   QLEO_PLAT_TAG_POLICY: "manylinux_2_28_x86_64"
-  # The engine is not on public PyPI; it lives in exaqt-python's GitLab PyPI
+  # The engine is taken from exaqt-python's GitLab PyPI
   # registry. Needs qleo-private on *that* project's CI job token allowlist.
   EXAQT_PROJECT_PATH: "development%2Fexaqt%2Fexaqt-python"
-  # Publishing a tagged wheel to this project's package registry is
-  # automatic. Publishing to *public PyPI* is not: set this to "true" as a
-  # project CI/CD variable, together with a `PYPI_API_TOKEN`, when a release
-  # is meant to go public. A PyPI name+version pair can never be reused, so
-  # this stays off until someone deliberately turns it on.
-  PUBLISH_PYPI: "false"
 
 stages:
   - deps
@@ -403,15 +397,13 @@ publish:registry:
       TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token twine upload \
         --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi \
         dist/*
-      if [ "$PUBLISH_PYPI" = "true" ]; then
-        if [ -z "$PYPI_API_TOKEN" ]; then
-          echo "PUBLISH_PYPI=true but PYPI_API_TOKEN is unset" >&2
-          exit 1
-        fi
-        TWINE_PASSWORD=${PYPI_API_TOKEN} TWINE_USERNAME=__token__ twine upload dist/*
-      else
-        echo "PUBLISH_PYPI is not \"true\" — published to the GitLab registry only"
+      # Every tag is a public release. QLEO_PYPI_TOKEN is a protected group
+      # variable of development/qleo, so only protected `v*` tags see it.
+      if [ -z "$QLEO_PYPI_TOKEN" ]; then
+        echo "QLEO_PYPI_TOKEN is unset: is this tag protected?" >&2
+        exit 1
       fi
+      TWINE_PASSWORD=${QLEO_PYPI_TOKEN} TWINE_USERNAME=__token__ twine upload dist/*
   rules: *rules-release
 
 pages:
