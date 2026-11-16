@@ -342,7 +342,8 @@ test:cudaq-gpu-wheel:
             pip install "${whl}[gpu]"
             qleo cudaq install
             qleo cudaq status
-            python - <<PY
+            # CUDA-Q reads kernel source from the script file, not from stdin.
+            cat > gpu_smoke.py <<PY
       import cudaq
       import qleo  # noqa: F401  (must be imported before set_target — see docs/cudaq.md)
 
@@ -362,6 +363,7 @@ test:cudaq-gpu-wheel:
       assert bitstrings == {"0" * 10, "1" * 10}, f"expected only the two GHZ branches, got {bitstrings}"
       print("qleo_gpu wheel smoke test passed:", dict(counts.items()))
       PY
+            python gpu_smoke.py
           '
         fi
       } > cudaq-gpu-wheel-tests.log 2>&1
