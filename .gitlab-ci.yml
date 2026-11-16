@@ -289,6 +289,9 @@ test:cudaq-gpu-wheel:
     CI_SLURM_GPUS: "1"
     CI_SLURM_CPUS_PER_TASK: "4"
     CI_SLURM_TIMELIMIT: "00-00:30:00"
+    # The nix runner has no search path of its own; same value as
+    # cudaq-integration's pipeline.
+    NIX_PATH: "nixpkgs=flake:nixpkgs:/nix/var/nix/profiles/per-user/root/channels"
   cache: []
   needs:
     - job: wheel
